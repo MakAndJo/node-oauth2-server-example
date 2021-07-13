@@ -39,7 +39,7 @@ function token(req, res) {
 function authorize(req, res) {
 	let request = new Request(req);
     let response = new Response(res);
-	return oauth.authorize(request, response)
+	return app.oauth.authorize(request, response)
 		.then((code) => 
 			res.json(code)
 		).catch((err) => 
