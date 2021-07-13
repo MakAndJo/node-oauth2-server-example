@@ -26,7 +26,8 @@
     "url": "https://github.com/pedroetb/node-oauth2-server-example.git"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "start-dev": "nodemon app.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -36,5 +37,8 @@
   "engines": {
     "node": ">=4.0.0",
     "npm": ">=2.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }

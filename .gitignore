@@ -1,2 +1,4 @@
 node_modules
 *.log
+.history
+.DS__Store

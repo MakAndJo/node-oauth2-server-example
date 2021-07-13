@@ -7,7 +7,6 @@ var express = require('express'),
 var app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(bodyParser.json());
 
 app.oauth = new OAuth2Server({
@@ -18,8 +17,8 @@ app.oauth = new OAuth2Server({
 
 app.all('/oauth/token', obtainToken);
 
-app.get('/', authenticateRequest, function(req, res) {
-
+app.get('/', authenticateRequest, function (req, res) {
+	console.log(res.locals.token.user)
 	res.send('Congratulations, you are in a secret area!');
 });
 
@@ -46,11 +45,11 @@ function authenticateRequest(req, res, next) {
 	var response = new Response(res);
 
 	return app.oauth.authenticate(request, response)
-		.then(function(token) {
-
+		.then(function (token) {
+			console.log('Accessed with token:', token);
+			res.locals.token = token;
 			next();
 		}).catch(function(err) {
-
 			res.status(err.code || 500).json(err);
 		});
 }
