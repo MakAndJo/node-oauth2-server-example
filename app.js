@@ -15,21 +15,33 @@ app.oauth = new OAuth2Server({
 	allowBearerTokensInQueryString: true
 });
 
-app.all('/oauth/token', obtainToken);
-
 app.get('/', authenticateRequest, function (req, res) {
 	console.log(res.locals.token.user)
 	res.send('Congratulations, you are in a secret area!');
 });
 
+app.all('/oauth/token', token);
+app.all('/oauth/authorize', authorize);
+
 app.listen(3000);
 
-function obtainToken(req, res) {
+function token(req, res) {
 	let request = new Request(req);
 	let response = new Response(res);
 	return app.oauth.token(request, response)
 		.then((token) => 
 			res.json(token)
+		).catch((err) => 
+			res.status(err.code || 500).json(err)
+		);
+}
+
+function authorize(req, res) {
+	let request = new Request(req);
+    let response = new Response(res);
+	return oauth.authorize(request, response)
+		.then((code) => 
+			res.json(code)
 		).catch((err) => 
 			res.status(err.code || 500).json(err)
 		);
