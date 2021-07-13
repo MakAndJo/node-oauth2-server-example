@@ -11,7 +11,8 @@ var config = {
 			'password',
 			'refresh_token'
 		],
-		redirectUris: []
+		redirectUris: [],
+		scopes: ['read', 'write']
 	}],
 	confidentialClients: [{
 		clientId: 'confidentialApplication',
@@ -146,16 +147,36 @@ var revokeToken = function(token) {
 	return !revokedTokensFound.length;
 };
 
+//const VALID_SCOPES = ['read', 'write'];
+const SCOPE_SEPERATOR = ',';
+
+const validateScope = function (user, client, scope) {
+	return !scope ? ['*'] : scope
+		.replace(/\s+/g, '')
+		.split(SCOPE_SEPERATOR)
+		.filter(s => client.scopes.indexOf(s) >= 0)
+		.join(SCOPE_SEPERATOR);
+};
+
+const verifyScope = function (token, scope) {
+	if (!token.scope) return false;
+	let requestedScopes = scope.replace(/\s+/g, '').split(SCOPE_SEPERATOR);
+	let authorizedScopes = token.scope.replace(/\s+/g, '').split(SCOPE_SEPERATOR);
+	return requestedScopes.every(s => authorizedScopes.indexOf(s) >= 0);
+}
+
 /**
  * Export model definition object.
  */
 
 module.exports = {
 	getAccessToken: getAccessToken,
+	getRefreshToken: getRefreshToken,
 	getClient: getClient,
-	saveToken: saveToken,
 	getUser: getUser,
 	getUserFromClient: getUserFromClient,
-	getRefreshToken: getRefreshToken,
-	revokeToken: revokeToken
+	saveToken: saveToken,
+	revokeToken: revokeToken,
+	validateScope: validateScope,
+	verifyScope: verifyScope
 };
