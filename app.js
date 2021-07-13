@@ -31,7 +31,8 @@ function token(req, res) {
 	return app.oauth.token(request, response)
 		.then((token) => 
 			res.json(token)
-		).catch((err) => 
+		)
+		.catch((err) => 
 			res.status(err.code || 500).json(err)
 		);
 }
@@ -42,7 +43,8 @@ function authorize(req, res) {
 	return app.oauth.authorize(request, response)
 		.then((code) => 
 			res.json(code)
-		).catch((err) => 
+		)
+		.catch((err) => 
 			res.status(err.code || 500).json(err)
 		);
 }
