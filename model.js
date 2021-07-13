@@ -11,7 +11,7 @@ var config = {
 			'password',
 			'refresh_token'
 		],
-		redirectUris: [],
+		redirectUris: ['http://example.org/oauth2'],
 		scopes: ['read', 'write']
 	}],
 	confidentialClients: [{
@@ -24,6 +24,7 @@ var config = {
 		redirectUris: []
 	}],
 	tokens: [],
+	codes: [],
 	users: [{
 		username: 'pedroetb',
 		password: 'password'
@@ -49,22 +50,42 @@ var dump = function() {
 var getAccessToken = function(token) {
 
 	var tokens = config.tokens.filter(function(savedToken) {
-
 		return savedToken.accessToken === token;
 	});
 
 	return tokens[0];
 };
 
+/*
+ * Methods used only by refresh_token grant type.
+ */
+
+var getRefreshToken = function (refreshToken) {
+
+	var tokens = config.tokens.filter(function (savedToken) {
+		return savedToken.refreshToken === refreshToken;
+	});
+
+	if (!tokens.length) {
+		return;
+	}
+
+	return tokens[0];
+};
+
+const getAuthorizationCode = function (code) {
+	let codes = config.codes.filter(savedCode => savedCode.code === code);
+	if (!codes.length) return;
+	return codes[0];
+}
+
 var getClient = function(clientId, clientSecret) {
 
 	var clients = config.clients.filter(function(client) {
-
 		return client.clientId === clientId && client.clientSecret === clientSecret;
 	});
 
 	var confidentialClients = config.confidentialClients.filter(function(client) {
-
 		return client.clientId === clientId && client.clientSecret === clientSecret;
 	});
 
@@ -72,19 +93,18 @@ var getClient = function(clientId, clientSecret) {
 };
 
 var saveToken = function(token, client, user) {
-
-	token.client = {
-		id: client.clientId
-	};
-
-	token.user = {
-		username: user.username
-	};
-
+	token.client = { id: client.clientId };
+	token.user = { username: user.username };
 	config.tokens.push(token);
-
 	return token;
 };
+
+const saveAuthorizationCode = function (code, client, user) {
+	code.client = { id: client.clientId };
+	code.user = { username: user.username };
+	config.codes.push(code);
+	return code;
+}
 
 /*
  * Method used only by password grant type.
@@ -93,7 +113,6 @@ var saveToken = function(token, client, user) {
 var getUser = function(username, password) {
 
 	var users = config.users.filter(function(user) {
-
 		return user.username === username && user.password === password;
 	});
 
@@ -107,40 +126,19 @@ var getUser = function(username, password) {
 var getUserFromClient = function(client) {
 
 	var clients = config.confidentialClients.filter(function(savedClient) {
-
 		return savedClient.clientId === client.clientId && savedClient.clientSecret === client.clientSecret;
 	});
 
 	return clients.length;
 };
 
-/*
- * Methods used only by refresh_token grant type.
- */
-
-var getRefreshToken = function(refreshToken) {
-
-	var tokens = config.tokens.filter(function(savedToken) {
-
-		return savedToken.refreshToken === refreshToken;
-	});
-
-	if (!tokens.length) {
-		return;
-	}
-
-	return tokens[0];
-};
-
 var revokeToken = function(token) {
 
 	config.tokens = config.tokens.filter(function(savedToken) {
-
 		return savedToken.refreshToken !== token.refreshToken;
 	});
 
 	var revokedTokensFound = config.tokens.filter(function(savedToken) {
-
 		return savedToken.refreshToken === token.refreshToken;
 	});
 
@@ -172,10 +170,12 @@ const verifyScope = function (token, scope) {
 module.exports = {
 	getAccessToken: getAccessToken,
 	getRefreshToken: getRefreshToken,
+	getAuthorizationCode: getAuthorizationCode,
 	getClient: getClient,
 	getUser: getUser,
 	getUserFromClient: getUserFromClient,
 	saveToken: saveToken,
+	saveAuthorizationCode: saveAuthorizationCode,
 	revokeToken: revokeToken,
 	validateScope: validateScope,
 	verifyScope: verifyScope
